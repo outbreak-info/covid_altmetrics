@@ -1,0 +1,5 @@
+# python notebook checkpoints
+.ipynb_checkpoints
+
+# credentials
+credentials.json

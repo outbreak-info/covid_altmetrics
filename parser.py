@@ -44,10 +44,8 @@ def get_source_ids():
         return(idlist)
 
 def generate_curator():
-    todate = datetime.now()
     curatedByObject = {"@type": "Organization", "identifier": "altmetric",  
-                              "name": "Altmetric", "affiliation": "Digital Science", 
-                              "curationDate": todate.strftime("%Y-%m-%d")}
+                              "name": "Altmetric", "affiliation": ["Digital Science"]}
     return(curatedByObject)
 
 def clean_ids(idlist):
@@ -58,12 +56,12 @@ def clean_ids(idlist):
     return(cleanidlist)
 
 def load_key():
-    #cred_path = os.path.join(DATA_PATH, 'credentials.json')
-    cred_path = 'credentials.json'
+    cred_path = os.path.join(DATA_PATH, 'credentials.json')
     with open(cred_path) as f:
         credentials = json.load(f) 
         apikey = credentials["key"]
     return(apikey)
+
 
 def fetch_meta(pubid):
     apikey = load_key()
@@ -82,4 +80,53 @@ def fetch_meta(pubid):
         error=True
     return(rawmeta,error)
 
+def generate_dump(cleanidlist):
+    altdump = []
+    for eachid in cleanidlist:
+        aspectslist = ['cited_by_fbwalls_count','cited_by_feeds_count','cited_by_gplus_count',
+                       'cited_by_msm_count','cited_by_posts_count','cited_by_rdts_count',
+                       'cited_by_tweeters_count','cited_by_videos_count','cited_by_accounts_count',
+                       'readers_count']
+        readerlist = ['citeulike','mendeley','connotea']
+        rawmeta,error = fetch_meta(eachid)
+        if error == False :
+            authorObject = generate_curator()
+            todate = datetime.now()
+            altdict = {"@type":"AggregateRating", "author":authorObject, "identifier":rawmeta["altmetric_id"],
+                       "url":rawmeta["details_url"], "image":rawmeta["images"]["small"], "name":"Altmetric",
+                       "reviewAspect":"Altmetric score", "ratingValue":rawmeta["score"], 
+                       "curationDate": todate.strftime("%Y-%m-%d")}
+            reviewlist = []
+            for eachrating in aspectslist:
+                a_review = {"@type":"Review","reviewAspect":eachrating}
+                try:
+                    a_review["reviewRating"]={"ratingValue":rawmeta[eachrating]}
+                except:
+                    a_review["reviewRating"]={"ratingValue":0}
+                reviewlist.append(a_review)
+            for eachreader in readerlist:
+                a_review = {"@type":"Review","reviewAspect":eachreader+" reader count"}
+                try:
+                    a_review["reviewRating"]={"ratingValue":rawmeta["readers"][eachreader]}
+                except:
+                    a_review["reviewRating"]={"ratingValue":0}
+                reviewlist.append(a_review)
+            altdict["reviews"]=reviewlist
+            dumpdict = {"_id":eachid, 
+                       "evaluations":[altdict]}
+            altdump.append(dumpdict)
+        else:
+            continue
+    return(altdump)
 
+def get_altmetrics_update(result_data_path):
+    idlist = get_source_ids()
+    cleanidlist = clean_ids(idlist)
+    altdump = generate_dump(cleanidlist)
+    with open(result_data_path, 'w', encoding='utf-8') as f:
+        f.write(json.dumps(altdump, indent=4))
+
+        
+#### MAIN ####
+result_data_path = 'results/altmetric_annotations.json'
+get_altmetrics_update(result_data_path)
