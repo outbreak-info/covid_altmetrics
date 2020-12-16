@@ -44,8 +44,10 @@ def get_source_ids():
         return(idlist)
 
 def generate_curator():
+    todate = datetime.now()
     curatedByObject = {"@type": "Organization", "identifier": "altmetric",  
-                              "name": "Altmetric", "affiliation": ["Digital Science"]}
+                       "name": "Altmetric", "affiliation": ["Digital Science"],
+                       "curationDate": todate.strftime("%Y-%m-%d")}
     return(curatedByObject)
 
 def clean_ids(idlist):
@@ -94,8 +96,7 @@ def generate_dump(cleanidlist):
             todate = datetime.now()
             altdict = {"@type":"AggregateRating", "author":authorObject, "identifier":rawmeta["altmetric_id"],
                        "url":rawmeta["details_url"], "image":rawmeta["images"]["small"], "name":"Altmetric",
-                       "reviewAspect":"Altmetric score", "ratingValue":rawmeta["score"], 
-                       "curationDate": todate.strftime("%Y-%m-%d")}
+                       "reviewAspect":"Altmetric score", "ratingValue":rawmeta["score"]}
             reviewlist = []
             for eachrating in aspectslist:
                 a_review = {"@type":"Review","reviewAspect":eachrating}
