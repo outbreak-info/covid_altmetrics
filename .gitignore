@@ -3,3 +3,6 @@
 
 # credentials
 credentials.json
+
+#virtual environments
+venv/*
