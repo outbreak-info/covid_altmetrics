@@ -1,6 +1,8 @@
+import os
 import json
 import requests
 from datetime import datetime
+import pathlib
 
 ### Get the size of the source (to make it easy to figure out when to stop scrolling)
 def fetch_src_size():
@@ -58,7 +60,7 @@ def clean_ids(idlist):
     return(cleanidlist)
 
 def load_key():
-    cred_path = os.path.join(DATA_PATH, 'credentials.json')
+    cred_path = os.path.join(DATAPATH, 'credentials.json')
     with open(cred_path) as f:
         credentials = json.load(f) 
         apikey = credentials["key"]
@@ -120,7 +122,7 @@ def generate_dump(cleanidlist):
             continue
     return(altdump)
 
-def get_altmetrics_update(result_data_path):
+def get_altmetrics_update(result_data_file):
     idlist = get_source_ids()
     cleanidlist = clean_ids(idlist)
     altdump = generate_dump(cleanidlist)
@@ -129,5 +131,7 @@ def get_altmetrics_update(result_data_path):
 
         
 #### MAIN ####
-result_data_path = 'results/altmetric_annotations.json'
-get_altmetrics_update(result_data_path)
+script_path = pathlib.Path(__file__).parent.absolute()
+RESULTSPATH = os.path.join(script_path,'results/')
+result_data_file = os.path.join(RESULTSPATH,'altmetric_annotations.json')
+get_altmetrics_update(result_data_file)
