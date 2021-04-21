@@ -126,7 +126,7 @@ def get_altmetrics_update(result_data_file):
     idlist = get_source_ids()
     cleanidlist = clean_ids(idlist)
     altdump = generate_dump(cleanidlist)
-    with open(result_data_path, 'w', encoding='utf-8') as f:
+    with open(result_data_file, 'w', encoding='utf-8') as f:
         f.write(json.dumps(altdump, indent=4))
 
         
