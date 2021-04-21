@@ -60,7 +60,7 @@ def clean_ids(idlist):
     return(cleanidlist)
 
 def load_key():
-    cred_path = os.path.join(DATAPATH, 'credentials.json')
+    cred_path = os.path.join(script_path, 'credentials.json')
     with open(cred_path) as f:
         credentials = json.load(f) 
         apikey = credentials["key"]

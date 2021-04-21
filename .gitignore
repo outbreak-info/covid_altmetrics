@@ -6,3 +6,6 @@ credentials.json
 
 #virtual environments
 venv/*
+
+#logging
+output.txt
