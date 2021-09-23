@@ -46,6 +46,15 @@ def get_source_ids():
     except:
         return(idlist)
 
+def map_to_main_id(each_id):
+    try:
+        r = requests.get('https://api.outbreak.info/resources/query?q=doi:"'+each_id+'"')
+        response = json.loads(r.text)
+        outbreak_id = response['hits'][0]['_id']
+    except:
+        outbreak_id = each_id
+    return(outbreak_id)
+
 def generate_curator():
     todate = datetime.now()
     curatedByObject = {"@type": "Organization", "identifier": "altmetric",  
@@ -96,7 +105,6 @@ def generate_dump(cleanidlist):
         rawmeta,error = fetch_meta(eachid)
         if error == False :
             authorObject = generate_curator()
-            todate = datetime.now()
             altdict = {"@type":"AggregateRating", "author":authorObject, "identifier":rawmeta["altmetric_id"],
                        "url":rawmeta["details_url"], "image":rawmeta["images"]["small"], "name":"Altmetric",
                        "reviewAspect":"Altmetric score", "ratingValue":rawmeta["score"]}
@@ -116,11 +124,10 @@ def generate_dump(cleanidlist):
                     a_review["reviewRating"]={"ratingValue":0}
                 reviewlist.append(a_review)
             altdict["reviews"]=reviewlist
-            dumpdict = {"_id":eachid, 
+            outbreak_id = map_to_main_id(each_id)
+            dumpdict = {"_id":outbreak_id, 
                        "evaluations":[altdict]}
             altdump.append(dumpdict)
-        else:
-            continue
     return(altdump)
 
 def get_altmetrics_update(result_data_file):
