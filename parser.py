@@ -5,11 +5,12 @@ from datetime import datetime
 import pathlib
 
 def fetch_src_size():
-    pubmeta = requests.get("https://api.outbreak.info/resources/resource/query?q=((_exists_:pmid)or(_exists__:doi))")
+    pubmeta = requests.get("https://api.outbreak.info/resources/query?q=((_exists_:pmid)or(_exists__:doi))")
     pubjson = json.loads(pubmeta.text)
     pubcount = int(pubjson["total"])
     return(pubcount)
 
+#### Pull ids from a json file use dois whenever possible
 def get_ids_from_json(jsonfile):
     idlist = []
     for eachhit in jsonfile["hits"]:
@@ -22,15 +23,16 @@ def get_ids_from_json(jsonfile):
                 idlist.append(eachhit["_id"])
     return(idlist)
 
+#### Ping the API and get the ids and dois and scroll through until they're all obtained
 def get_source_ids():
     doi_source_size = fetch_src_size()
-    r = requests.get("https://api.outbreak.info/resources/resource/query?q=((_exists_:pmid)or(_exists_:doi))&fields=_id,doi&fetch_all=true")
+    r = requests.get("https://api.outbreak.info/resources/query?q=((_exists_:pmid)or(_exists_:doi))&fields=_id,doi&fetch_all=true")
     response = json.loads(r.text)
     idlist = get_ids_from_json(response)
     try:
         scroll_id = response["_scroll_id"]
         while len(idlist) < source_size:
-            r2 = requests.get("https://api.outbreak.info/resources/resource/query?q=((_exists_:pmid)or(_exists_:doi))&fields=_id,doi&fetch_all=true&scroll_id="+scroll_id)
+            r2 = requests.get("https://api.outbreak.info/resources/query?q=((_exists_:pmid)or(_exists_:doi))&fields=_id,doi&fetch_all=true&scroll_id="+scroll_id)
             response2 = json.loads(r2.text)
             idlist2 = set(get_ids_from_json(response2))
             tmpset = set(idlist)
