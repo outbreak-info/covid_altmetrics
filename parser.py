@@ -22,8 +22,8 @@ def get_ids_from_json(jsonfile):
                 idlist.append(eachhit["_id"])
     return(idlist)
 
-def get_source_ids(id_type):
-    doi_source_size = fetch_src_size(id_type)
+def get_source_ids():
+    doi_source_size = fetch_src_size()
     r = requests.get("https://api.outbreak.info/resources/resource/query?q=((_exists_:pmid)or(_exists_:doi))&fields=_id,doi&fetch_all=true")
     response = json.loads(r.text)
     idlist = get_ids_from_json(response)
