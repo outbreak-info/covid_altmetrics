@@ -46,13 +46,13 @@ def get_source_ids():
     except:
         return(idlist)
 
-def map_to_main_id(each_id):
+def map_to_main_id(eachid):
     try:
-        r = requests.get('https://api.outbreak.info/resources/query?q=doi:"'+each_id+'"')
+        r = requests.get('https://api.outbreak.info/resources/query?q=doi:"'+eachid+'"')
         response = json.loads(r.text)
         outbreak_id = response['hits'][0]['_id']
     except:
-        outbreak_id = each_id
+        outbreak_id = eachid
     return(outbreak_id)
 
 def generate_curator():
@@ -124,7 +124,7 @@ def generate_dump(cleanidlist):
                     a_review["reviewRating"]={"ratingValue":0}
                 reviewlist.append(a_review)
             altdict["reviews"]=reviewlist
-            outbreak_id = map_to_main_id(each_id)
+            outbreak_id = map_to_main_id(eachid)
             dumpdict = {"_id":outbreak_id, 
                        "evaluations":[altdict]}
             altdump.append(dumpdict)
