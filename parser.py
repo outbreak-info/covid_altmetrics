@@ -4,8 +4,11 @@ import requests
 from datetime import datetime
 import pathlib
 
-def fetch_src_size():
-    pubmeta = requests.get("https://api.outbreak.info/resources/query?q=((_exists_:pmid)or(_exists__:doi))")
+query_types = {"pubs":'((_exists_:pmid)or(_exists__:doi))',
+               "clins":'(curatedBy.name:"ClinicalTrials.gov")'}
+
+def fetch_src_size(query_type):
+    pubmeta = requests.get("https://api.outbreak.info/resources/query?q="+query_type)
     pubjson = json.loads(pubmeta.text)
     pubcount = int(pubjson["total"])
     return(pubcount)
@@ -24,15 +27,15 @@ def get_ids_from_json(jsonfile):
     return(idlist)
 
 #### Ping the API and get the ids and dois and scroll through until they're all obtained
-def get_source_ids():
-    doi_source_size = fetch_src_size()
-    r = requests.get("https://api.outbreak.info/resources/query?q=((_exists_:pmid)or(_exists_:doi))&fields=_id,doi&fetch_all=true")
+def get_source_ids(query_type):
+    source_size = fetch_src_size(query_type)
+    r = requests.get("https://api.outbreak.info/resources/query?q="+query_type+"&fields=_id,doi&fetch_all=true")
     response = json.loads(r.text)
     idlist = get_ids_from_json(response)
     try:
         scroll_id = response["_scroll_id"]
         while len(idlist) < source_size:
-            r2 = requests.get("https://api.outbreak.info/resources/query?q=((_exists_:pmid)or(_exists_:doi))&fields=_id,doi&fetch_all=true&scroll_id="+scroll_id)
+            r2 = requests.get("https://api.outbreak.info/resources/query?q="+query_type+"&fields=_id,doi&fetch_all=true&scroll_id="+scroll_id)
             response2 = json.loads(r2.text)
             idlist2 = set(get_ids_from_json(response2))
             tmpset = set(idlist)
@@ -65,17 +68,17 @@ def generate_curator():
 def clean_ids(idlist):
     pmidlist = [ x for x in idlist if "pmid" in x ]
     doilist = [ x for x in idlist if "10." in x ] 
-    cleanidlist = list(set(pmidlist).union(set(doilist)))
+    nctlist = [ x for x in idlist if "NCT" in x ]
+    cleanidlist = list(set(pmidlist).union(set(doilist).union(set(nctlist))))
     missinglist = [ x for x in idlist if x not in cleanidlist ] 
     return(cleanidlist)
-
+    
 def load_key():
-    cred_path = os.path.join(script_path, 'credentials.json')
+    cred_path = os.path.join(DATA_PATH, 'credentials.json')
     with open(cred_path) as f:
         credentials = json.load(f) 
         apikey = credentials["key"]
     return(apikey)
-
 
 def fetch_meta(pubid):
     apikey = load_key()
@@ -83,6 +86,8 @@ def fetch_meta(pubid):
     key_url = '?key='+apikey
     if 'pmid' in pubid:
         api_call = base_url+'pmid/'+pubid.replace("pmid","")+key_url
+    elif 'NCT' in pubid:
+        api_call = base_url+'nct_id/'+pubid+key_url       
     else:
         api_call = base_url+'doi/'+pubid+key_url
     r = requests.get(api_call)
@@ -93,7 +98,8 @@ def fetch_meta(pubid):
         rawmeta={}
         error=True
     return(rawmeta,error)
-
+    
+    
 def generate_dump(cleanidlist):
     altdump = []
     for eachid in cleanidlist:
@@ -128,15 +134,22 @@ def generate_dump(cleanidlist):
             dumpdict = {"_id":outbreak_id, 
                        "evaluations":[altdict]}
             altdump.append(dumpdict)
+        time.sleep(1)
     return(altdump)
 
+
 def get_altmetrics_update(result_data_file):
-    idlist = get_source_ids()
+    print('fetching ids: ',datetime.now())
+    pubidlist = get_source_ids(query_types["pubs"])
+    clinidlist = get_source_ids(query_types["clins"])
+    idlist = list(set(pubidlist).union(set(clinidlist)))
+    print('cleaning up ids: ',datetime.now())
     cleanidlist = clean_ids(idlist)
+    print('fetching altmetrics: ',datetime.now())
     altdump = generate_dump(cleanidlist)
+    print('exporting results: ',datetime.now())
     with open(result_data_file, 'w', encoding='utf-8') as f:
         f.write(json.dumps(altdump, indent=4))
-
         
 #### MAIN ####
 script_path = pathlib.Path(__file__).parent.absolute()
