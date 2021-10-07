@@ -1,17 +1,21 @@
 import os
 import json
 import requests
+import random
 from datetime import datetime
+import time
 import pathlib
 
 query_types = {"pubs":'((_exists_:pmid)or(_exists__:doi))',
                "clins":'(curatedBy.name:"ClinicalTrials.gov")'}
+
 
 def fetch_src_size(query_type):
     pubmeta = requests.get("https://api.outbreak.info/resources/query?q="+query_type)
     pubjson = json.loads(pubmeta.text)
     pubcount = int(pubjson["total"])
     return(pubcount)
+
 
 #### Pull ids from a json file use dois whenever possible
 def get_ids_from_json(jsonfile):
@@ -25,6 +29,7 @@ def get_ids_from_json(jsonfile):
             if eachhit["_id"] not in idlist:
                 idlist.append(eachhit["_id"])
     return(idlist)
+
 
 #### Ping the API and get the ids and dois and scroll through until they're all obtained
 def get_source_ids(query_type):
@@ -49,6 +54,7 @@ def get_source_ids(query_type):
     except:
         return(idlist)
 
+    
 def map_to_main_id(eachid):
     try:
         r = requests.get('https://api.outbreak.info/resources/query?q=doi:"'+eachid+'"')
@@ -58,12 +64,14 @@ def map_to_main_id(eachid):
         outbreak_id = eachid
     return(outbreak_id)
 
+
 def generate_curator():
     todate = datetime.now()
     curatedByObject = {"@type": "Organization", "identifier": "altmetric",  
                        "name": "Altmetric", "affiliation": ["Digital Science"],
                        "curationDate": todate.strftime("%Y-%m-%d")}
     return(curatedByObject)
+
 
 def clean_ids(idlist):
     pmidlist = [ x for x in idlist if "pmid" in x ]
@@ -73,17 +81,17 @@ def clean_ids(idlist):
     #missinglist = [ x for x in idlist if x not in cleanidlist ] ##(only for checking incompatible ids)
     return(cleanidlist)
     
-def load_key():
-    cred_path = os.path.join(DATA_PATH, 'credentials.json')
+    
+def load_key(script_path):
+    cred_path = os.path.join(script_path, 'credentials.json')
     with open(cred_path) as f:
         credentials = json.load(f) 
         apikey = credentials["key"]
     return(apikey)
 
-def fetch_meta(pubid):
-    apikey = load_key()
+
+def fetch_meta(key_url,pubid):
     base_url = 'https://api.altmetric.com/v1/'
-    key_url = '?key='+apikey
     if 'pmid' in pubid:
         api_call = base_url+'pmid/'+pubid.replace("pmid","")+key_url
     elif 'NCT' in pubid:
@@ -91,16 +99,21 @@ def fetch_meta(pubid):
     else:
         api_call = base_url+'doi/'+pubid+key_url
     r = requests.get(api_call)
+    hourlylimit = r.headers["X-HourlyRateLimit-Limit"]
+    secondslimit = int(hourlylimit)/3600
+    sleeptime = 1/secondslimit
     if r.status_code==200:
         rawmeta = json.loads(r.text)
         error=False
     else:
         rawmeta={}
         error=True
-    return(rawmeta,error)
+    return(rawmeta,error,sleeptime)
     
     
-def generate_dump(cleanidlist):
+def generate_dump(script_path,cleanidlist):
+    apikey = load_key(script_path)
+    key_url = '?key='+apikey
     altdump = []
     for eachid in cleanidlist:
         aspectslist = ['cited_by_fbwalls_count','cited_by_feeds_count','cited_by_gplus_count',
@@ -108,7 +121,7 @@ def generate_dump(cleanidlist):
                        'cited_by_tweeters_count','cited_by_videos_count','cited_by_accounts_count',
                        'readers_count']
         readerlist = ['citeulike','mendeley','connotea']
-        rawmeta,error = fetch_meta(eachid)
+        rawmeta,error,sleeptime = fetch_meta(key_url,eachid)
         if error == False :
             authorObject = generate_curator()
             altdict = {"@type":"AggregateRating", "author":authorObject, "identifier":rawmeta["altmetric_id"],
@@ -134,25 +147,34 @@ def generate_dump(cleanidlist):
             dumpdict = {"_id":outbreak_id, 
                        "evaluations":[altdict]}
             altdump.append(dumpdict)
-        time.sleep(1)
+        time.sleep(sleeptime)
     return(altdump)
 
 
-def get_altmetrics_update(result_data_file):
+def get_altmetrics_update(script_path,test=False):
+    RESULTSPATH = os.path.join(script_path,'results/')
+    result_data_file = os.path.join(RESULTSPATH,'altmetric_annotations.json')
     print('fetching ids: ',datetime.now())
-    pubidlist = get_source_ids(query_types["pubs"])
-    clinidlist = get_source_ids(query_types["clins"])
+    if test == True:
+        pubidlist = ["pmid32835433","pmid32835716","2020.01.19.911669","2020.01.21.914929","zenodo.3976542"]
+        clinidlist = ["NCT03348670","NCT00173459","NCT00571389"]
+    else:
+        pubidlist = get_source_ids(query_types["pubs"])
+        clinidlist = get_source_ids(query_types["clins"])
     idlist = list(set(pubidlist).union(set(clinidlist)))
     print('cleaning up ids: ',datetime.now())
     cleanidlist = clean_ids(idlist)
     print('fetching altmetrics: ',datetime.now())
-    altdump = generate_dump(cleanidlist)
+    if test == True:
+        testidlist = random.sample(cleanidlist, 5)
+        altdump = generate_dump(script_path,testidlist)
+    else:
+        altdump = generate_dump(script_path,cleanidlist)
     print('exporting results: ',datetime.now())
     with open(result_data_file, 'w', encoding='utf-8') as f:
         f.write(json.dumps(altdump, indent=4))
         
+        
 #### MAIN ####
 script_path = pathlib.Path(__file__).parent.absolute()
-RESULTSPATH = os.path.join(script_path,'results/')
-result_data_file = os.path.join(RESULTSPATH,'altmetric_annotations.json')
-get_altmetrics_update(result_data_file)
+get_altmetrics_update(script_path)
