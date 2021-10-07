@@ -70,7 +70,7 @@ def clean_ids(idlist):
     doilist = [ x for x in idlist if "10." in x ] 
     nctlist = [ x for x in idlist if "NCT" in x ]
     cleanidlist = list(set(pmidlist).union(set(doilist).union(set(nctlist))))
-    missinglist = [ x for x in idlist if x not in cleanidlist ] 
+    #missinglist = [ x for x in idlist if x not in cleanidlist ] ##(only for checking incompatible ids)
     return(cleanidlist)
     
 def load_key():
