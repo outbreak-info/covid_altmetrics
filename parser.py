@@ -99,9 +99,12 @@ def fetch_meta(key_url,pubid):
     else:
         api_call = base_url+'doi/'+pubid+key_url
     r = requests.get(api_call)
-    hourlylimit = r.headers["X-HourlyRateLimit-Limit"]
-    secondslimit = int(hourlylimit)/3600
-    sleeptime = 1/secondslimit
+    try:
+        hourlylimit = r.headers["X-HourlyRateLimit-Limit"]
+        secondslimit = int(hourlylimit)/3600
+        sleeptime = 1/secondslimit
+    except:
+        sleeptime = 1
     if r.status_code==200:
         rawmeta = json.loads(r.text)
         error=False
