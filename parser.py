@@ -174,8 +174,8 @@ def get_altmetrics_update(script_path,test=False):
     else:
         altdump = generate_dump(script_path,cleanidlist)
     print('exporting results: ',datetime.now())
-    with open(result_data_file, 'w', encoding='utf-8') as f:
-        f.write(json.dumps(altdump, indent=4))
+    for eachdict in altdump:
+        yield(eachdict)
         
         
 #### MAIN ####
