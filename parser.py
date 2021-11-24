@@ -205,7 +205,7 @@ retry_strategy = Retry(
     total=3,
     backoff_factor=1,
     status_forcelist=[429, 500, 502, 503, 504],
-    method_whitelist=["HEAD", "GET", "OPTIONS"]
+    allowed_methods=["HEAD", "GET", "OPTIONS"]
 )
 
 adapter = TimeoutHTTPAdapter(timeout=2.5,max_retries=retry_strategy)

@@ -1,121 +1,5 @@
 [
     {
-        "_id": "pmid32835433",
-        "evaluations": [
-            {
-                "@type": "AggregateRating",
-                "author": {
-                    "@type": "Organization",
-                    "identifier": "altmetric",
-                    "name": "Altmetric",
-                    "affiliation": [
-                        "Digital Science"
-                    ],
-                    "curationDate": "2021-11-23"
-                },
-                "identifier": 90575286,
-                "url": "http://www.altmetric.com/details.php?citation_id=90575286",
-                "image": "https://badges.altmetric.com/?size=64&score=11&types=mmmmtttt",
-                "name": "Altmetric",
-                "reviewAspect": "Altmetric score",
-                "ratingValue": 11,
-                "reviews": [
-                    {
-                        "@type": "Review",
-                        "reviewAspect": "cited_by_fbwalls_count",
-                        "reviewRating": {
-                            "ratingValue": 0
-                        }
-                    },
-                    {
-                        "@type": "Review",
-                        "reviewAspect": "cited_by_feeds_count",
-                        "reviewRating": {
-                            "ratingValue": 0
-                        }
-                    },
-                    {
-                        "@type": "Review",
-                        "reviewAspect": "cited_by_gplus_count",
-                        "reviewRating": {
-                            "ratingValue": 0
-                        }
-                    },
-                    {
-                        "@type": "Review",
-                        "reviewAspect": "cited_by_msm_count",
-                        "reviewRating": {
-                            "ratingValue": 1
-                        }
-                    },
-                    {
-                        "@type": "Review",
-                        "reviewAspect": "cited_by_posts_count",
-                        "reviewRating": {
-                            "ratingValue": 2
-                        }
-                    },
-                    {
-                        "@type": "Review",
-                        "reviewAspect": "cited_by_rdts_count",
-                        "reviewRating": {
-                            "ratingValue": 0
-                        }
-                    },
-                    {
-                        "@type": "Review",
-                        "reviewAspect": "cited_by_tweeters_count",
-                        "reviewRating": {
-                            "ratingValue": 1
-                        }
-                    },
-                    {
-                        "@type": "Review",
-                        "reviewAspect": "cited_by_videos_count",
-                        "reviewRating": {
-                            "ratingValue": 0
-                        }
-                    },
-                    {
-                        "@type": "Review",
-                        "reviewAspect": "cited_by_accounts_count",
-                        "reviewRating": {
-                            "ratingValue": 2
-                        }
-                    },
-                    {
-                        "@type": "Review",
-                        "reviewAspect": "readers_count",
-                        "reviewRating": {
-                            "ratingValue": 32
-                        }
-                    },
-                    {
-                        "@type": "Review",
-                        "reviewAspect": "citeulike reader count",
-                        "reviewRating": {
-                            "ratingValue": 0
-                        }
-                    },
-                    {
-                        "@type": "Review",
-                        "reviewAspect": "mendeley reader count",
-                        "reviewRating": {
-                            "ratingValue": 32
-                        }
-                    },
-                    {
-                        "@type": "Review",
-                        "reviewAspect": "connotea reader count",
-                        "reviewRating": {
-                            "ratingValue": 0
-                        }
-                    }
-                ]
-            }
-        ]
-    },
-    {
         "_id": "NCT03348670",
         "evaluations": [
             {
@@ -127,7 +11,7 @@
                     "affiliation": [
                         "Digital Science"
                     ],
-                    "curationDate": "2021-11-23"
+                    "curationDate": "2021-11-24"
                 },
                 "identifier": 32913356,
                 "url": "http://www.altmetric.com/details.php?citation_id=32913356",
@@ -218,6 +102,122 @@
                         "reviewAspect": "mendeley reader count",
                         "reviewRating": {
                             "ratingValue": 0
+                        }
+                    },
+                    {
+                        "@type": "Review",
+                        "reviewAspect": "connotea reader count",
+                        "reviewRating": {
+                            "ratingValue": 0
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "_id": "pmid32835433",
+        "evaluations": [
+            {
+                "@type": "AggregateRating",
+                "author": {
+                    "@type": "Organization",
+                    "identifier": "altmetric",
+                    "name": "Altmetric",
+                    "affiliation": [
+                        "Digital Science"
+                    ],
+                    "curationDate": "2021-11-24"
+                },
+                "identifier": 90575286,
+                "url": "http://www.altmetric.com/details.php?citation_id=90575286",
+                "image": "https://badges.altmetric.com/?size=64&score=11&types=mmmmtttt",
+                "name": "Altmetric",
+                "reviewAspect": "Altmetric score",
+                "ratingValue": 11,
+                "reviews": [
+                    {
+                        "@type": "Review",
+                        "reviewAspect": "cited_by_fbwalls_count",
+                        "reviewRating": {
+                            "ratingValue": 0
+                        }
+                    },
+                    {
+                        "@type": "Review",
+                        "reviewAspect": "cited_by_feeds_count",
+                        "reviewRating": {
+                            "ratingValue": 0
+                        }
+                    },
+                    {
+                        "@type": "Review",
+                        "reviewAspect": "cited_by_gplus_count",
+                        "reviewRating": {
+                            "ratingValue": 0
+                        }
+                    },
+                    {
+                        "@type": "Review",
+                        "reviewAspect": "cited_by_msm_count",
+                        "reviewRating": {
+                            "ratingValue": 1
+                        }
+                    },
+                    {
+                        "@type": "Review",
+                        "reviewAspect": "cited_by_posts_count",
+                        "reviewRating": {
+                            "ratingValue": 2
+                        }
+                    },
+                    {
+                        "@type": "Review",
+                        "reviewAspect": "cited_by_rdts_count",
+                        "reviewRating": {
+                            "ratingValue": 0
+                        }
+                    },
+                    {
+                        "@type": "Review",
+                        "reviewAspect": "cited_by_tweeters_count",
+                        "reviewRating": {
+                            "ratingValue": 1
+                        }
+                    },
+                    {
+                        "@type": "Review",
+                        "reviewAspect": "cited_by_videos_count",
+                        "reviewRating": {
+                            "ratingValue": 0
+                        }
+                    },
+                    {
+                        "@type": "Review",
+                        "reviewAspect": "cited_by_accounts_count",
+                        "reviewRating": {
+                            "ratingValue": 2
+                        }
+                    },
+                    {
+                        "@type": "Review",
+                        "reviewAspect": "readers_count",
+                        "reviewRating": {
+                            "ratingValue": 32
+                        }
+                    },
+                    {
+                        "@type": "Review",
+                        "reviewAspect": "citeulike reader count",
+                        "reviewRating": {
+                            "ratingValue": 0
+                        }
+                    },
+                    {
+                        "@type": "Review",
+                        "reviewAspect": "mendeley reader count",
+                        "reviewRating": {
+                            "ratingValue": 32
                         }
                     },
                     {
