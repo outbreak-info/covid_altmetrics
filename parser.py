@@ -25,6 +25,21 @@ class TimeoutHTTPAdapter(HTTPAdapter):
             kwargs["timeout"] = self.timeout
         return super().send(request, **kwargs)
 
+## Fetch COVID-19 LST LOE annotations for merging since merging via BioThings will cause overwriting rather than aggregating
+def load_loe():
+    loe_file = 'https://raw.githubusercontent.com/outbreak-info/covid19_LST_annotations/main/results/loe_annotations.json'
+    r = httprequests.get(loe_file)
+    loe_info = r.json()  
+    return(loe_info)
+
+def check_loe(outbreakid,loe_info):
+    search_results = [element['evaluations'][0] for element in loe_info if element['_id'] == outbreakid]
+    if len(search_results)>0:
+        loe_ann = search_results[0]
+    else:
+        loe_ann = False
+    return(loe_ann)
+
 
 query_types = {"pubs":'((_exists_:pmid)or(_exists__:doi))',
                "clins":'(curatedBy.name:"ClinicalTrials.gov")'}
@@ -135,6 +150,7 @@ def fetch_meta(key_url,pubid):
     
     
 def generate_dump(script_path,cleanidlist):
+    loe_info = load_loe()
     apikey = load_key(script_path)
     key_url = '?key='+apikey
     altdump = []
@@ -167,8 +183,13 @@ def generate_dump(script_path,cleanidlist):
                 reviewlist.append(a_review)
             altdict["reviews"]=reviewlist
             outbreak_id = map_to_main_id(eachid)
-            dumpdict = {"_id":outbreak_id, 
-                       "evaluations":[altdict]}
+            loe_ann = check_loe(outbreak_id,loe_info)
+            if loe_ann == False:
+                dumpdict = {"_id":outbreak_id, 
+                           "evaluations":[altdict]}
+            else:
+                dumpdict = {"_id":outbreak_id, 
+                           "evaluations":[altdict,loe_ann]}
             altdump.append(dumpdict)
         time.sleep(sleeptime)
     return(altdump)
@@ -194,8 +215,8 @@ def get_altmetrics_update(script_path,test=False):
     else:
         altdump = generate_dump(script_path,cleanidlist)
     print('exporting results: ',datetime.now())
-    with open(result_data_file, 'w', encoding='utf-8') as f:
-        f.write(json.dumps(altdump, indent=4))
+    for eachdict in altdump:
+        yield(eachdict)
         
         
 #### MAIN ####
