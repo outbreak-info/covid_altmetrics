@@ -6,12 +6,47 @@ from datetime import datetime
 import time
 import pathlib
 
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+
+DEFAULT_TIMEOUT = 5 # seconds
+
+class TimeoutHTTPAdapter(HTTPAdapter):
+    def __init__(self, *args, **kwargs):
+        self.timeout = DEFAULT_TIMEOUT
+        if "timeout" in kwargs:
+            self.timeout = kwargs["timeout"]
+            del kwargs["timeout"]
+        super().__init__(*args, **kwargs)
+
+    def send(self, request, **kwargs):
+        timeout = kwargs.get("timeout")
+        if timeout is None:
+            kwargs["timeout"] = self.timeout
+        return super().send(request, **kwargs)
+
+## Fetch COVID-19 LST LOE annotations for merging since merging via BioThings will cause overwriting rather than aggregating
+def load_loe():
+    loe_file = 'https://raw.githubusercontent.com/outbreak-info/covid19_LST_annotations/main/results/loe_annotations.json'
+    r = httprequests.get(loe_file)
+    loe_info = r.json()  
+    return(loe_info)
+
+def check_loe(outbreakid,loe_info):
+    search_results = [element['evaluations'][0] for element in loe_info if element['_id'] == outbreakid]
+    if len(search_results)>0:
+        loe_ann = search_results[0]
+    else:
+        loe_ann = False
+    return(loe_ann)
+
+
 query_types = {"pubs":'((_exists_:pmid)or(_exists__:doi))',
                "clins":'(curatedBy.name:"ClinicalTrials.gov")'}
 
 
 def fetch_src_size(query_type):
-    pubmeta = requests.get("https://api.outbreak.info/resources/query?q="+query_type)
+    pubmeta = httprequests.get("https://api.outbreak.info/resources/query?q="+query_type)
     pubjson = json.loads(pubmeta.text)
     pubcount = int(pubjson["total"])
     return(pubcount)
@@ -34,13 +69,13 @@ def get_ids_from_json(jsonfile):
 #### Ping the API and get the ids and dois and scroll through until they're all obtained
 def get_source_ids(query_type):
     source_size = fetch_src_size(query_type)
-    r = requests.get("https://api.outbreak.info/resources/query?q="+query_type+"&fields=_id,doi&fetch_all=true")
+    r = httprequests.get("https://api.outbreak.info/resources/query?q="+query_type+"&fields=_id,doi&fetch_all=true")
     response = json.loads(r.text)
     idlist = get_ids_from_json(response)
     try:
         scroll_id = response["_scroll_id"]
         while len(idlist) < source_size:
-            r2 = requests.get("https://api.outbreak.info/resources/query?q="+query_type+"&fields=_id,doi&fetch_all=true&scroll_id="+scroll_id)
+            r2 = httprequests.get("https://api.outbreak.info/resources/query?q="+query_type+"&fields=_id,doi&fetch_all=true&scroll_id="+scroll_id)
             response2 = json.loads(r2.text)
             idlist2 = set(get_ids_from_json(response2))
             tmpset = set(idlist)
@@ -57,7 +92,7 @@ def get_source_ids(query_type):
     
 def map_to_main_id(eachid):
     try:
-        r = requests.get('https://api.outbreak.info/resources/query?q=doi:"'+eachid+'"')
+        r = httprequests.get('https://api.outbreak.info/resources/query?q=doi:"'+eachid+'"')
         response = json.loads(r.text)
         outbreak_id = response['hits'][0]['_id']
     except:
@@ -98,7 +133,7 @@ def fetch_meta(key_url,pubid):
         api_call = base_url+'nct_id/'+pubid+key_url       
     else:
         api_call = base_url+'doi/'+pubid+key_url
-    r = requests.get(api_call)
+    r = httprequests.get(api_call)
     try:
         hourlylimit = r.headers["X-HourlyRateLimit-Limit"]
         secondslimit = int(hourlylimit)/3600
@@ -115,6 +150,7 @@ def fetch_meta(key_url,pubid):
     
     
 def generate_dump(script_path,cleanidlist):
+    loe_info = load_loe()
     apikey = load_key(script_path)
     key_url = '?key='+apikey
     altdump = []
@@ -147,8 +183,13 @@ def generate_dump(script_path,cleanidlist):
                 reviewlist.append(a_review)
             altdict["reviews"]=reviewlist
             outbreak_id = map_to_main_id(eachid)
-            dumpdict = {"_id":outbreak_id, 
-                       "evaluations":[altdict]}
+            loe_ann = check_loe(outbreak_id,loe_info)
+            if loe_ann == False:
+                dumpdict = {"_id":outbreak_id, 
+                           "evaluations":[altdict]}
+            else:
+                dumpdict = {"_id":outbreak_id, 
+                           "evaluations":[altdict,loe_ann]}
             altdump.append(dumpdict)
         time.sleep(sleeptime)
     return(altdump)
@@ -179,5 +220,18 @@ def get_altmetrics_update(script_path,test=False):
         
         
 #### MAIN ####
+httprequests = requests.Session()
+
+retry_strategy = Retry(
+    total=3,
+    backoff_factor=1,
+    status_forcelist=[429, 500, 502, 503, 504],
+    allowed_methods=["HEAD", "GET", "OPTIONS"]
+)
+
+adapter = TimeoutHTTPAdapter(timeout=2.5,max_retries=retry_strategy)
+httprequests.mount("https://", adapter)
+httprequests.mount("http://", adapter)
+
 script_path = pathlib.Path(__file__).parent.absolute()
 get_altmetrics_update(script_path)
