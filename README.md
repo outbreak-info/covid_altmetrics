@@ -7,3 +7,6 @@ The file path for the metadata dump can be set by changing the path set for the 
 Note that the credentials.json file contains the API key for altmetrics api and is needed to bypass rate limits, but does not provide additional data access. 
 
 An example of the results is included in the `results` directory.
+
+**Note that LOE annotations are included**
+Since the COVID-19 LST levels of evidence annotations are no longer being updated AND because the biothings merger will cause the altmetrics annotations to overwrite rather than append the LOE annotations, this parser will actually pull and merge LOE annotations.
