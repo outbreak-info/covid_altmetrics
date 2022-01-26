@@ -98,7 +98,7 @@ def map_to_main_id(eachid):
 def generate_curator():
     todate = datetime.now()
     curatedByObject = {"@type": "Organization", "identifier": "altmetric",  
-                       "name": "Altmetric", "affiliation": ["Digital Science"],
+                       "name": "Altmetric", "affiliation": [{"name":"Digital Science"}],
                        "curationDate": todate.strftime("%Y-%m-%d")}
     return(curatedByObject)
 
@@ -186,6 +186,13 @@ def generate_dump(script_path,cleanidlist):
                 dumpdict = {"_id":outbreak_id, 
                            "evaluations":[altdict,loe_ann]}
             altdump.append(dumpdict)
+        else:
+            outbreak_id = map_to_main_id(eachid)
+            loe_ann = check_loe(outbreak_id,loe_info)
+            if loe_ann != False:
+                dumpdict = {"_id":outbreak_id, 
+                           "evaluations":[loe_ann]}
+                altdump.append(dumpdict)
         time.sleep(sleeptime)
     return(altdump)
 
