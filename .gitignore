@@ -9,3 +9,6 @@ venv/*
 
 #logging
 output.txt
+
+#results
+results/*
