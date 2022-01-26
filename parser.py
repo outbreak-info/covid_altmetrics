@@ -9,8 +9,6 @@ import pathlib
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-DEFAULT_TIMEOUT = 5 # seconds
-
 class TimeoutHTTPAdapter(HTTPAdapter):
     def __init__(self, *args, **kwargs):
         self.timeout = DEFAULT_TIMEOUT
@@ -25,6 +23,7 @@ class TimeoutHTTPAdapter(HTTPAdapter):
             kwargs["timeout"] = self.timeout
         return super().send(request, **kwargs)
 
+    
 ## Fetch COVID-19 LST LOE annotations for merging since merging via BioThings will cause overwriting rather than aggregating
 def load_loe():
     loe_file = 'https://raw.githubusercontent.com/outbreak-info/covid19_LST_annotations/main/results/loe_annotations.json'
@@ -41,12 +40,8 @@ def check_loe(outbreakid,loe_info):
     return(loe_ann)
 
 
-query_types = {"pubs":'((_exists_:pmid)or(_exists__:doi))',
-               "clins":'(curatedBy.name:"ClinicalTrials.gov")'}
-
-
 def fetch_src_size(query_type):
-    pubmeta = httprequests.get("https://api.outbreak.info/resources/query?q="+query_type)
+    pubmeta = httprequests.get(f"https://api.outbreak.info/resources/query?q={query_type}")
     pubjson = json.loads(pubmeta.text)
     pubcount = int(pubjson["total"])
     return(pubcount)
@@ -69,13 +64,13 @@ def get_ids_from_json(jsonfile):
 #### Ping the API and get the ids and dois and scroll through until they're all obtained
 def get_source_ids(query_type):
     source_size = fetch_src_size(query_type)
-    r = httprequests.get("https://api.outbreak.info/resources/query?q="+query_type+"&fields=_id,doi&fetch_all=true")
+    r = httprequests.get(f"https://api.outbreak.info/resources/query?q={query_type}&fields=_id,doi&fetch_all=true")
     response = json.loads(r.text)
     idlist = get_ids_from_json(response)
     try:
         scroll_id = response["_scroll_id"]
         while len(idlist) < source_size:
-            r2 = httprequests.get("https://api.outbreak.info/resources/query?q="+query_type+"&fields=_id,doi&fetch_all=true&scroll_id="+scroll_id)
+            r2 = httprequests.get(f"https://api.outbreak.info/resources/query?q={query_type}&fields=_id,doi&fetch_all=true&scroll_id={scroll_id}")
             response2 = json.loads(r2.text)
             idlist2 = set(get_ids_from_json(response2))
             tmpset = set(idlist)
@@ -92,7 +87,7 @@ def get_source_ids(query_type):
     
 def map_to_main_id(eachid):
     try:
-        r = httprequests.get('https://api.outbreak.info/resources/query?q=doi:"'+eachid+'"')
+        r = httprequests.get(f'https://api.outbreak.info/resources/query?q=doi:"{eachid}"')
         response = json.loads(r.text)
         outbreak_id = response['hits'][0]['_id']
     except:
@@ -128,11 +123,11 @@ def load_key(script_path):
 def fetch_meta(key_url,pubid):
     base_url = 'https://api.altmetric.com/v1/'
     if 'pmid' in pubid:
-        api_call = base_url+'pmid/'+pubid.replace("pmid","")+key_url
+        api_call = f'{base_url}pmid/{pubid.replace("pmid","")}{key_url}'
     elif 'NCT' in pubid:
-        api_call = base_url+'nct_id/'+pubid+key_url       
+        api_call = f'{base_url}nct_id/{pubid}{key_url}'       
     else:
-        api_call = base_url+'doi/'+pubid+key_url
+        api_call = f'{base_url}doi/{pubid}{key_url}'
     r = httprequests.get(api_call)
     try:
         hourlylimit = r.headers["X-HourlyRateLimit-Limit"]
@@ -152,7 +147,7 @@ def fetch_meta(key_url,pubid):
 def generate_dump(script_path,cleanidlist):
     loe_info = load_loe()
     apikey = load_key(script_path)
-    key_url = '?key='+apikey
+    key_url = f'?key={apikey}'
     altdump = []
     for eachid in cleanidlist:
         aspectslist = ['cited_by_fbwalls_count','cited_by_feeds_count','cited_by_gplus_count',
@@ -175,7 +170,7 @@ def generate_dump(script_path,cleanidlist):
                     a_review["reviewRating"]={"ratingValue":0}
                 reviewlist.append(a_review)
             for eachreader in readerlist:
-                a_review = {"@type":"Review","reviewAspect":eachreader+" reader count"}
+                a_review = {"@type":"Review","reviewAspect":f"{eachreader} reader count"}
                 try:
                     a_review["reviewRating"]={"ratingValue":rawmeta["readers"][eachreader]}
                 except:
@@ -199,8 +194,10 @@ def get_altmetrics_update(script_path,test=False):
     RESULTSPATH = os.path.join(script_path,'results/')
     result_data_file = os.path.join(RESULTSPATH,'altmetric_annotations.json')
     print('fetching ids: ',datetime.now())
+    query_types = {"pubs":'((_exists_:pmid)or(_exists__:doi))',
+                   "clins":'(curatedBy.name:"ClinicalTrials.gov")'}
     if test == True:
-        pubidlist = ["pmid32835433","pmid32835716","2020.01.19.911669","2020.01.21.914929","zenodo.3976542"]
+        pubidlist = ["pmid32835433","pmid32835716","10.1101/2020.01.19.911669","10.1101/2020.01.21.914929","10.5281/zenodo.5776439","29489394"]
         clinidlist = ["NCT03348670","NCT00173459","NCT00571389"]
     else:
         pubidlist = get_source_ids(query_types["pubs"])
@@ -215,8 +212,8 @@ def get_altmetrics_update(script_path,test=False):
     else:
         altdump = generate_dump(script_path,cleanidlist)
     print('exporting results: ',datetime.now())
-    for eachdict in altdump:
-        yield(eachdict)
+    with open(result_data_file, 'w', encoding='utf-8') as f:
+        f.write(json.dumps(altdump, indent=4))
         
         
 #### MAIN ####
