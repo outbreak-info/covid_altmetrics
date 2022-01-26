@@ -9,6 +9,8 @@ import pathlib
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
+DEFAULT_TIMEOUT = 5 # seconds
+
 class TimeoutHTTPAdapter(HTTPAdapter):
     def __init__(self, *args, **kwargs):
         self.timeout = DEFAULT_TIMEOUT
