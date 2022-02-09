@@ -11,5 +11,4 @@ venv/*
 output.txt
 
 #results
-results/altmetric_annotations.json
-results/altmetric_annotations1.json
+results/*
