@@ -130,19 +130,23 @@ def fetch_meta(key_url,pubid):
         api_call = f'{base_url}nct_id/{pubid}{key_url}'       
     else:
         api_call = f'{base_url}doi/{pubid}{key_url}'
-    r = httprequests.get(api_call)
     try:
-        hourlylimit = r.headers["X-HourlyRateLimit-Limit"]
-        secondslimit = int(hourlylimit)/3600
-        sleeptime = 1/secondslimit
+        r = httprequests.get(api_call)
+        try:
+            hourlylimit = r.headers["X-HourlyRateLimit-Limit"]
+            secondslimit = int(hourlylimit)/3600
+            sleeptime = 1/secondslimit
+        except:
+            sleeptime = 1
+        if r.status_code==200:
+            rawmeta = json.loads(r.text)
+            error=False
+        else:
+            rawmeta={}
+            error=True
     except:
-        sleeptime = 1
-    if r.status_code==200:
-        rawmeta = json.loads(r.text)
-        error=False
-    else:
-        rawmeta={}
-        error=True
+            rawmeta={}
+            error=True  
     return(rawmeta,error,sleeptime)
     
     
