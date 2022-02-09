@@ -5,6 +5,7 @@ import random
 from datetime import datetime
 import time
 import pathlib
+import pickle
 
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
@@ -206,21 +207,28 @@ def generate_dump(script_path,cleanidlist):
 def get_altmetrics_update(script_path,test=False):
     RESULTSPATH = os.path.join(script_path,'results/')
     result_data_file = os.path.join(RESULTSPATH,'altmetric_annotations.json')
-    print('fetching ids: ',datetime.now())
-    query_types = {"pubs":'((_exists_:pmid)or(_exists__:doi))',
-                   "clins":'(curatedBy.name:"ClinicalTrials.gov")'}
-    if test == True:
-        pubidlist = ["pmid32835433","pmid32835716","10.1101/2020.01.19.911669","10.1101/2020.01.21.914929","10.5281/zenodo.5776439","29489394"]
-        clinidlist = ["NCT03348670","NCT00173459","NCT00571389"]
-    else:
-        pubidlist = get_source_ids(query_types["pubs"])
-        clinidlist = get_source_ids(query_types["clins"])
-    idlist = list(set(pubidlist).union(set(clinidlist)))
-    print('cleaning up ids: ',datetime.now())
-    cleanidlist = clean_ids(idlist)
+    try:
+        print('fetching ids: ',datetime.now())
+        query_types = {"pubs":'((_exists_:pmid)or(_exists_:doi))',
+                       "clins":'(curatedBy.name:"ClinicalTrials.gov")'}
+        if test == True:
+            pubidlist = ["pmid32835433","pmid32835716","10.1101/2020.01.19.911669","10.1101/2020.01.21.914929","10.5281/zenodo.5776439","29489394"]
+            clinidlist = ["NCT03348670","NCT00173459","NCT00571389"]
+        else:
+            pubidlist = get_source_ids(query_types["pubs"])
+            clinidlist = get_source_ids(query_types["clins"])
+        idlist = list(set(pubidlist).union(set(clinidlist)))
+        print('cleaning up ids: ',datetime.now())
+        cleanidlist = clean_ids(idlist)
+        with open(os.path.join(RESULTSPATH,'cleanids.pickle'),'wb') as savefile:
+            pickle.dump(cleanidlist,savefile)
+    except:
+        with open(os.path.join(RESULTSPATH,'cleanids.pickle'),'rb') as savefile:
+            cleanidlist = pickle.load(savefile)
     print('fetching altmetrics: ',datetime.now())
     if test == True:
         testidlist = random.sample(cleanidlist, 5)
+        print(testidlist)
         altdump = generate_dump(script_path,testidlist)
     else:
         altdump = generate_dump(script_path,cleanidlist)
