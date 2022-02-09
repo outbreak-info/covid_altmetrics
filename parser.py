@@ -100,7 +100,7 @@ def map_to_main_id(eachid):
 def generate_curator():
     todate = datetime.now()
     curatedByObject = {"@type": "Organization", "identifier": "altmetric",  
-                       "name": "Altmetric", "affiliation": [{"name":"Digital Science"}],
+                       "name": "Altmetric", "affiliation": "Digital Science",
                        "curationDate": todate.strftime("%Y-%m-%d")}
     return(curatedByObject)
 
