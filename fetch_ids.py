@@ -48,7 +48,7 @@ retry_strategy = Retry(
     allowed_methods=["HEAD", "GET", "OPTIONS"]
 )
 
-adapter = TimeoutHTTPAdapter(timeout=2.5,max_retries=retry_strategy)
+adapter = TimeoutHTTPAdapter(timeout=25,max_retries=retry_strategy)
 httprequests.mount("https://", adapter)
 httprequests.mount("http://", adapter)
 

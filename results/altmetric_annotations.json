@@ -1,6 +1,6 @@
 [
     {
-        "_id": "NCT03348670",
+        "_id": "10.1016/j.jcf.2020.03.010",
         "evaluations": [
             {
                 "@type": "AggregateRating",
@@ -8,13 +8,11 @@
                     "@type": "Organization",
                     "identifier": "altmetric",
                     "name": "Altmetric",
-                    "affiliation": [
-                        "Digital Science"
-                    ],
-                    "curationDate": "2021-11-24"
+                    "affiliation": "Digital Science",
+                    "curationDate": "2022-02-10"
                 },
-                "identifier": 32913356,
-                "url": "http://www.altmetric.com/details.php?citation_id=32913356",
+                "identifier": 83740742,
+                "url": "https://www.altmetric.com/details.php?citation_id=83740742",
                 "image": "https://badges.altmetric.com/?size=64&score=2&types=tttttttt",
                 "name": "Altmetric",
                 "reviewAspect": "Altmetric score",
@@ -87,28 +85,28 @@
                         "@type": "Review",
                         "reviewAspect": "readers_count",
                         "reviewRating": {
-                            "ratingValue": 0
+                            "ratingValue": 21
                         }
                     },
                     {
                         "@type": "Review",
                         "reviewAspect": "citeulike reader count",
                         "reviewRating": {
-                            "ratingValue": 0
+                            "ratingValue": "0"
                         }
                     },
                     {
                         "@type": "Review",
                         "reviewAspect": "mendeley reader count",
                         "reviewRating": {
-                            "ratingValue": 0
+                            "ratingValue": "21"
                         }
                     },
                     {
                         "@type": "Review",
                         "reviewAspect": "connotea reader count",
                         "reviewRating": {
-                            "ratingValue": 0
+                            "ratingValue": "0"
                         }
                     }
                 ]
@@ -116,7 +114,7 @@
         ]
     },
     {
-        "_id": "pmid32835433",
+        "_id": "10.1021/acschemneuro.0c00422",
         "evaluations": [
             {
                 "@type": "AggregateRating",
@@ -124,17 +122,15 @@
                     "@type": "Organization",
                     "identifier": "altmetric",
                     "name": "Altmetric",
-                    "affiliation": [
-                        "Digital Science"
-                    ],
-                    "curationDate": "2021-11-24"
+                    "affiliation": "Digital Science",
+                    "curationDate": "2022-02-10"
                 },
-                "identifier": 90575286,
-                "url": "http://www.altmetric.com/details.php?citation_id=90575286",
-                "image": "https://badges.altmetric.com/?size=64&score=11&types=mmmmtttt",
+                "identifier": 93163899,
+                "url": "https://www.altmetric.com/details.php?citation_id=93163899",
+                "image": "https://badges.altmetric.com/?size=64&score=1&types=tttttttt",
                 "name": "Altmetric",
                 "reviewAspect": "Altmetric score",
-                "ratingValue": 11,
+                "ratingValue": 1,
                 "reviews": [
                     {
                         "@type": "Review",
@@ -161,14 +157,14 @@
                         "@type": "Review",
                         "reviewAspect": "cited_by_msm_count",
                         "reviewRating": {
-                            "ratingValue": 1
+                            "ratingValue": 0
                         }
                     },
                     {
                         "@type": "Review",
                         "reviewAspect": "cited_by_posts_count",
                         "reviewRating": {
-                            "ratingValue": 2
+                            "ratingValue": 1
                         }
                     },
                     {
@@ -196,35 +192,35 @@
                         "@type": "Review",
                         "reviewAspect": "cited_by_accounts_count",
                         "reviewRating": {
-                            "ratingValue": 2
+                            "ratingValue": 1
                         }
                     },
                     {
                         "@type": "Review",
                         "reviewAspect": "readers_count",
                         "reviewRating": {
-                            "ratingValue": 32
+                            "ratingValue": 76
                         }
                     },
                     {
                         "@type": "Review",
                         "reviewAspect": "citeulike reader count",
                         "reviewRating": {
-                            "ratingValue": 0
+                            "ratingValue": "0"
                         }
                     },
                     {
                         "@type": "Review",
                         "reviewAspect": "mendeley reader count",
                         "reviewRating": {
-                            "ratingValue": 32
+                            "ratingValue": "76"
                         }
                     },
                     {
                         "@type": "Review",
                         "reviewAspect": "connotea reader count",
                         "reviewRating": {
-                            "ratingValue": 0
+                            "ratingValue": "0"
                         }
                     }
                 ]
