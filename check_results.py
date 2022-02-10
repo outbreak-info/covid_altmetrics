@@ -2,6 +2,7 @@ import pandas as pd
 import json
 import pathlib
 import os
+import pickle
 
 def check_for_empties(evallist):
     if len(evallist)==0:
@@ -15,7 +16,7 @@ def check_for_empty_affiliations(evallist):
         affiliation = eacheval['author']['affiliation']
         affiliation_list.append(affiliation)
     if len(affiliation_list)==1:
-        return(affiliation[0])
+        return(affiliation_list[0])
     if len(affiliation_list)==0:
         return(None)
     if len(affiliation_list)>1:
@@ -24,6 +25,7 @@ def check_for_empty_affiliations(evallist):
 script_path = pathlib.Path(__file__).parent.absolute()
 results_path = os.path.join(script_path,'results/')
 results_file = os.path.join(results_path,'altmetric_annotations.json')
+idlist_file = os.path.join(results_path,'cleanids.pickle')
 
 with open(results_file,'r') as inputfile:
     jsoninfo = pd.read_json(inputfile)
@@ -41,3 +43,8 @@ print("no affiliations: ", len(jsoninfo.loc[jsoninfo['affiliation_content']==Non
 print("one affiliations: ", len(jsoninfo.loc[jsoninfo['affiliation_content']=="Digital Science"]))
 print("multiple affiliation: ",len(jsoninfo.loc[~((jsoninfo['affiliation_content']==None)|
                                                   (jsoninfo['affiliation_content']=="Digital Science"))]))
+
+with open(idlist_file,'rb') as idsavefile:
+    cleanidlist = pickle.load(idsavefile)
+
+print("the number of id's pulled from outbreak.info were: ",len(cleanidlist))
