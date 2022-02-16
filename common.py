@@ -157,6 +157,8 @@ def generate_dump(script_path,cleanidlist):
     apikey = load_key(script_path)
     key_url = f'?key={apikey}'
     altdump = []
+    i=1
+    j=1
     for eachid in cleanidlist:
         aspectslist = ['cited_by_fbwalls_count','cited_by_feeds_count','cited_by_gplus_count',
                        'cited_by_msm_count','cited_by_posts_count','cited_by_rdts_count',
@@ -201,6 +203,13 @@ def generate_dump(script_path,cleanidlist):
                 dumpdict = {"_id":outbreak_id, 
                            "evaluations":[loe_ann]}
                 altdump.append(dumpdict)
+        i=i+1
+        if i==1000:
+            print(datetime.now(), "finished processing: ",i*j," ids.")
+            j=j+1
+            i=1
+            with open(os.path.join('results','tmp.pickle'),'wb') as tmpfile:
+                pickle.dump(altdump,tmpfile)
         time.sleep(sleeptime)
     return(altdump)
 

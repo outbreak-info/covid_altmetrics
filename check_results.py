@@ -26,6 +26,7 @@ script_path = pathlib.Path(__file__).parent.absolute()
 results_path = os.path.join(script_path,'results/')
 results_file = os.path.join(results_path,'altmetric_annotations.json')
 idlist_file = os.path.join(results_path,'cleanids.pickle')
+save_point = os.path.join(results_path,'tmp.pickle')
 
 with open(results_file,'r') as inputfile:
     jsoninfo = pd.read_json(inputfile)
@@ -48,3 +49,7 @@ with open(idlist_file,'rb') as idsavefile:
     cleanidlist = pickle.load(idsavefile)
 
 print("the number of id's pulled from outbreak.info were: ",len(cleanidlist))
+
+with open(save_point,'rb') as tmpfile:
+    lastsave = pickle.load(tmpfile)
+    print("The save point contains: ",len(lastsave)," records.")
