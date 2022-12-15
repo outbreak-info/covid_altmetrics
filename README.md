@@ -1,4 +1,5 @@
 ## Altmetric Parser
+[![DOI](https://zenodo.org/badge/310066111.svg)](https://zenodo.org/badge/latestdoi/310066111)
 This script pulls the identifiers for Publications in outbreak.info and pings the altmetric API with acceptable identifiers (dois and pmids). It formats the returned result as schema-compliant AggregateReviews which can be added to the record for the corresponding publication using the `evaluations` property.
 
 The metadata is all dumped into a single json file for merging into the database.
